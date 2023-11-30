@@ -2,34 +2,34 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const { API, roomIds, getImageSetlist } = require("../helpers");
 
-exports.getMostWatchRoom = async (req, res) => {
-  try {
-    const promises = Object.values(roomIds).map(async (room_id) => {
-      const response = await axios.post(API, {
-        room_id: room_id,
-        cookie: req.body.token,
-      });
+// exports.getMostWatchRoom = async (req, res) => {
+//   try {
+//     const promises = Object.values(roomIds).map(async (room_id) => {
+//       const response = await axios.post(API, {
+//         room_id: room_id,
+//         cookie: req.body.token,
+//       });
 
-      return response.data;
-    });
+//       return response.data;
+//     });
 
-    const room = await Promise.all(promises);
+//     const room = await Promise.all(promises);
 
-    const mostVisitRoom = room
-      .map((item) => {
-        return {
-          name: item?.room_url_key?.replace("JKT48_", ""),
-          image: item?.image_square?.replace("_m.jpeg", "_l.jpeg"),
-          visit: item?.visit_count,
-        };
-      })
-      .sort((a, b) => b.visit - a.visit);
+//     const mostVisitRoom = room
+//       .map((item) => {
+//         return {
+//           name: item?.room_url_key?.replace("JKT48_", ""),
+//           image: item?.image_square?.replace("_m.jpeg", "_l.jpeg"),
+//           visit: item?.visit_count,
+//         };
+//       })
+//       .sort((a, b) => b.visit - a.visit);
 
-    res.send(mostVisitRoom);
-  } catch (error) {
-    console.log(error);
-  }
-};
+//     res.send(mostVisitRoom);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 const convertRupiah = (value = 0) => {
   if (value === null) {
