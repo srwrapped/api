@@ -2,34 +2,35 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const { API, roomIds, getImageSetlist } = require("../helpers");
 
-// exports.getMostWatchRoom = async (req, res) => {
-//   try {
-//     const promises = Object.values(roomIds).map(async (room_id) => {
-//       const response = await axios.post(API, {
-//         room_id: room_id,
-//         cookie: req.body.token,
-//       });
+exports.getMostWatchRoom = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const promises = Object.values(roomIds).map(async (room_id) => {
+      const response = await axios.get(`https://www.showroom-live.com/api/room/profile?room_id=${room_id}`, {
+        headers: {
+          Cookie: token || '', // Provide an empty string as a default value if token is undefined/null
+        },
+      });
 
-//       return response.data;
-//     });
+      return response.data;
+    });
 
-//     const room = await Promise.all(promises);
+    const roomData = await Promise.all(promises);
 
-//     const mostVisitRoom = room
-//       .map((item) => {
-//         return {
-//           name: item?.room_url_key?.replace("JKT48_", ""),
-//           image: item?.image_square?.replace("_m.jpeg", "_l.jpeg"),
-//           visit: item?.visit_count,
-//         };
-//       })
-//       .sort((a, b) => b.visit - a.visit);
+    const mostVisitRoom = roomData
+      .map((item) => ({
+        name: item.room_url_key ? item.room_url_key.replace("JKT48_", "") : '',
+        image: item.image_square ? item.image_square.replace("_m.jpeg", "_l.jpeg") : '',
+        visit: item.visit_count || 0, // Default to 0 if visit_count is undefined/null
+      }))
+      .sort((a, b) => b.visit - a.visit);
 
-//     res.send(mostVisitRoom);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
+    res.send(mostVisitRoom);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 const convertRupiah = (value = 0) => {
   if (value === null) {
